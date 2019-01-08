@@ -24,48 +24,110 @@ function logError(error) {
   console.log('Looks like there was a problem:', error);
 }
 
+function validateResponse(response) {
+	if (!response.ok) {
+		throw Error(response.statusText);
+	}
+	return response;
+}
+
+function readResponseAsJson(response) {
+	return response.json();
+}
+
+function readResponseAsBlob(response) {
+	return response.blob();
+}
+
+function showImage(responseAsBlob) {
+	// Assuming the DOM has a div with id 'container'
+	var container = document.getElementById('img-container');
+	var imgElem = document.createElement('img');
+	container.appendChild(imgElem);
+	var imgUrl = URL.createObjectURL(responseAsBlob);
+	imgElem.src = imgUrl;
+}
+
+function readResponseAsText(response) {
+	return response.text();
+  }
+  
+function showText(responseAsText) {
+	// Assuming the DOM has a div with id 'message'
+	var message = document.getElementById('message');
+	message.textContent = responseAsText;
+}
+
 
 // Fetch JSON ----------
 
-function fetchJSON() {
-  // TODO
+function fetchJSON(pathToResource) {
+	fetch(pathToResource)
+		.then(validateResponse)
+		.then(readResponseAsJson)
+		.then(logResult)
+		.catch(logError);
 }
 const jsonButton = document.getElementById('json-btn');
-jsonButton.addEventListener('click', fetchJSON);
-
+jsonButton.addEventListener('click', fetchJSON('examples/animals.json'));
+fetchJSON('examples/animals.json')
 
 // Fetch Image ----------
 
-function fetchImage() {
-  // TODO
+function fetchImage(pathToResource) {
+  fetch(pathToResource)
+  .then(validateResponse)
+  .then(readResponseAsBlob)
+  .then(showImage)
+  .catch(logError);
 }
 const imgButton = document.getElementById('img-btn');
-imgButton.addEventListener('click', fetchImage);
+imgButton.addEventListener('click', fetchImage('examples/fetching.jpg'));
 
 
 // Fetch text ----------
-
-function fetchText() {
-  // TODO
+  
+function fetchText(pathToResource) {
+	fetch(pathToResource)
+	.then(validateResponse)
+	.then(readResponseAsText)
+	.then(showText)
+	.catch(logError);
 }
+
 const textButton = document.getElementById('text-btn');
-textButton.addEventListener('click', fetchText);
+textButton.addEventListener('click', fetchText('examples/words.txt'));
 
 
 // HEAD request ----------
 
-function headRequest() {
-  // TODO
+function checkSize(response) {
+	var size = response.headers.get('content-length');
+	// Do stuff based on response size
 }
+  
+  function headRequest(pathToResource) {
+	fetch(pathToResource, {
+	  method: 'HEAD'
+	})
+	.then(validateResponse)
+	.then(checkSize)
+	// ...
+	.catch(logError);
+  }
+
 const headButton = document.getElementById('head-btn');
-headButton.addEventListener('click', headRequest);
+headButton.addEventListener('click', headRequest('examples/words.txt'));
 
 
 // POST request ----------
 
 /* NOTE: Never send unencrypted user credentials in production! */
 function postRequest() {
-  // TODO
+	fetch('someurl/comment', {
+		method: 'POST',
+		body: new FormData(document.getElementById('msg-form'))
+	  })
 }
 const postButton = document.getElementById('post-btn');
 postButton.addEventListener('click', postRequest);
